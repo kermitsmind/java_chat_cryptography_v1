@@ -3,6 +3,7 @@
 package chat;
 
 import java.io.*;
+import java.time.format.SignStyle;
 import java.util.*;
 import java.net.*;
 
@@ -18,13 +19,19 @@ public class Server
 
     public static void main(String[] args) throws IOException
     {
-        // server is listening on port 1234
-        ServerSocket ss = new ServerSocket(1234);
+        System.out.println("Initializing server...");
+
+        // server is listening for a port, default backlog and InetAddress
+        Scanner scn = new Scanner(System.in);
+        System.out.print("Port: ");
+        int port = Integer.parseInt(scn.nextLine());
+
+        ServerSocket ss = new ServerSocket(port);
 
         Socket s;
+        System.out.println("Server succesfully initialized");
 
-        // running infinite loop for getting
-        // client request
+        // running infinite loop for getting client request
         while (true)
         {
             // Accept the incoming request
@@ -36,15 +43,27 @@ public class Server
             DataInputStream dis = new DataInputStream(s.getInputStream());
             DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
-            System.out.println("Creating a new handler for this client...");
+            //Establishing parameters for client handler
+            String receivedName = "name";
+
+            try {
+                // receive the string
+                receivedName = dis.readUTF();
+            }catch (EOFException e){
+                e.printStackTrace();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            System.out.println("Creating a new handler for " + receivedName);
 
             // Create a new handler object for handling this request.
-            ClientHandler mtch = new ClientHandler(s,"client " + i, dis, dos);
+            ClientHandler mtch = new ClientHandler(s, receivedName, dis, dos);
 
             // Create a new Thread with this object.
             Thread t = new Thread(mtch);
 
-            System.out.println("Adding this client to active client list");
+            System.out.println("Adding " + receivedName + " to active client list");
 
             // add this client to active clients list
             ar.add(mtch);
@@ -72,8 +91,7 @@ class ClientHandler implements Runnable
     boolean isloggedin;
 
     // constructor
-    public ClientHandler(Socket s, String name,
-                         DataInputStream dis, DataOutputStream dos) {
+    public ClientHandler(Socket s, String name, DataInputStream dis, DataOutputStream dos) {
         this.dis = dis;
         this.dos = dos;
         this.name = name;
@@ -84,26 +102,39 @@ class ClientHandler implements Runnable
     @Override
     public void run() {
 
-        String received;
+        String received = "";
         while (true)
         {
             try
             {
                 // receive the string
+                String message = "";
+                String receiver = "";
                 received = dis.readUTF();
-
-                System.out.println(received);
-
-                if(received.equals("logout")){
-                    this.isloggedin=false;
-                    this.s.close();
-                    break;
+                if(received.contains("#"))
+                {
+                    StringTokenizer st = new StringTokenizer(received, "#");
+                    message = st.nextToken();
+                    receiver = st.nextToken();
+                    System.out.println(name + " to " + receiver + ": " + message);
                 }
 
-                // break the string into message and recipient part
-                StringTokenizer st = new StringTokenizer(received, "#");
-                String MsgToSend = st.nextToken();
-                String recipient = st.nextToken();
+                try{
+                    if(received.equals("LOGOUT")){
+                        System.out.println("Closing " + name + " connection...");
+                        this.isloggedin=false;
+                        this.s.close();
+                        System.out.println("    Connection closed");
+                        break;
+                    }
+                }catch (EOFException e){
+                    e.printStackTrace();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+
+                String MsgToSend = message;
+                String recipient = receiver;
 
                 // search for the recipient in the connected devices list.
                 // ar is the vector storing client of active users
@@ -117,19 +148,21 @@ class ClientHandler implements Runnable
                         break;
                     }
                 }
-            } catch (IOException e) {
-
+            }catch (EOFException e){
+                e.printStackTrace();
+            }catch (IOException e){
                 e.printStackTrace();
             }
-
         }
         try
         {
             // closing resources
             this.dis.close();
             this.dos.close();
-
-        }catch(IOException e){
+            System.out.println("    Resources closed");
+        }catch (EOFException e){
+            e.printStackTrace();
+        }catch (IOException e){
             e.printStackTrace();
         }
     }
