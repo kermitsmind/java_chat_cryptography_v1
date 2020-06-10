@@ -4,12 +4,15 @@ package chat;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Client
 {
     public static void main(String args[]) throws UnknownHostException, IOException, EOFException
     {
+        OneTimePad otp = new OneTimePad();
         Scanner scn = new Scanner(System.in);
 
         // getting ip
@@ -59,7 +62,10 @@ public class Client
                     {
                         System.out.println(msg);
                         //System.out.print("MESSAGE_1: ");
-                        msg = scn.nextLine();
+                        msg= scn.nextLine();
+
+
+
                     }
                     doubleMenu = 0;
 
@@ -106,7 +112,42 @@ public class Client
                         if((choice == 1 || choice == 2) && msg.equals("MENU"))
                         {
                             //System.out.print("MESSAGE_2: ");
-                            msg = scn.nextLine();
+
+                            //!!!
+                            //!!!!!!!!! Dodany kod: wysylaie plikow //////
+                            System.out.println("Your next message will be:");
+                            System.out.println("1: File path");
+                            System.out.println("2: Text message");
+                            int option = scn.nextInt();
+                            scn.nextLine();
+                            switch (option) {
+                                case 1: {
+
+                                    System.out.println("Input File Name: ");
+
+                                    String inputFileName = scn.nextLine().trim();
+
+
+                                    File input = new File(inputFileName);
+                                    String contents = null;
+                                    try {
+                                        contents = new String(Files.readAllBytes(Paths.get(inputFileName)));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    msg =inputFileName + "--f--" + contents;
+                                    System.out.println(msg);
+                                    break;
+                                }
+                                case 2: {
+                                    System.out.print("Your text message: ");
+                                    msg = scn.nextLine();
+                                    msg = otp.doStaff("encrypt",msg);
+                                    break;
+                                }
+                            }
+                            //msg = scn.nextLine();
                             if(msg.equals("MENU"))
                             {
                                 doubleMenu = 1;
@@ -149,7 +190,33 @@ public class Client
                     try {
                         // read the message sent to this client
                         String msg = dis.readUTF();
-                        System.out.println(msg);
+                        //Sprawdzenie czy przesłana wiadomosć to plik
+                        System.out.println("INPUT:"+ msg);
+                        if (msg.indexOf("--f--")!=-1) {
+                            int fileNameEnd = msg.indexOf("--f--");
+                            int fileBegin = msg.indexOf("--f--") + 5;
+                            String fileName = msg.substring(0,fileNameEnd);
+                            String fileContents = msg.substring(fileBegin);
+
+                            File receivedFile = new File("recived.txt");
+                            Writer writer = new FileWriter(receivedFile);
+                            writer.write(fileContents);
+                            writer.close();
+                            System.out.print("Received a file: " + fileName);
+                        }
+
+                        else {
+                            System.out.println("!!");
+                            System.out.println(msg);
+                            int i = msg.indexOf(':');
+                            System.out.println(i);
+                            msg = msg.substring(i+1,msg.length()-1);
+
+                            System.out.println("!!");
+                            System.out.println("Recived encrypted message:"+ msg);
+                            System.out.println("Recived decrypted message:"+otp.doStaff("decrypt",msg));
+                            System.out.println();
+                        }
                     }catch (EOFException e){
                         //e.printStackTrace();
                     }catch (IOException e){

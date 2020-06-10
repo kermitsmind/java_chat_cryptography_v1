@@ -1,0 +1,58 @@
+Wysyłanie pliku:
+1. Umożliwienie wczytywania plików
+2. Zamiana pliku na String i dalej wysyłanie tak samo jak normalnych wiadomości
+Odbiór pliku:
+3. Wczytanie Stringu (jak normalnej wiadomości)
+4. Zamiana na plik
+_________________________________________________________________________________
+
+1.
+
+//deklaracja zmiennych//
+
+String  inputFileName, contents;
+
+//wczytanie nazwy pliku od użytkownika,
+pozostaje pytanie kiedy program powinien prosić o podanie nazwy (wczytanie pliku)
+trudno mi wymyślić jakieś "profesjonalne" rozwiązanie, ja zrobiłabym to po prostu w ten sposób:
+-program pyta o chęć wysłania pliku: "System.out.print("Send file? Answer yes or no");"
+-jeśli użytkownik wpisze "yes" to pojawia się poniższy kod do wczytywania pliku i jego zamiany na String, jeśli "no" to wysyłamy normalną wiadomość jak w kodzie Michała. Jeśli wpisze cokolwiek innego to wysyłamy powżysze pytanie aż do skutku.
+Ale takie łopatologiczne rozwiązanie nie pasuje do tego skomplikowanego kodu Michała,
+więc może ktoś o większym doświadczeniu w programowaniu ma jakiś ładniejszy pomysł.//
+
+System.out.print("Input File Name: ");
+inputFileName = scn.nextLine().trim();
+File input = new File( inputFileName );
+_________________________________________________________________________________
+
+2.
+
+//zamiana pliku na String (aby było wiadomo, że ten String to plik i przy odbieraniu zamieniać na pliki tylko pliki a nie wszystkie Stringi to dodałam na początku nazwę pliku oraz "--f--", możliwe, że jest jakieś lepsze rozwiązanie tego problemu, ale nie jestem programistką)//
+
+contents = new String(Files.readAllBytes(Paths.get(inputFileName)));
+contents =inputFileName + "--f--" + contents;
+_________________________________________________________________________________
+
+3. i 4.
+
+//sprawdzenie czy dostarczony String zawiera "--f--", zamiana na plik lub też nie (i wtedy wyświetlenie normalnej wiadomości)
+-na podstawie "--f--" dzielę dostarczony String na dwa: treść pliku i nazwę//
+
+if (msg.indexOf("--f--")!=-1) {
+
+	int fileNameEnd = msg.indexOf("--f--");
+	int fileBegin = msg.indexOf("--f--") + 5;
+	String fileName = msg.substring(0,fileNameEnd);
+	String fileContents = msg.substring(fileBegin);
+
+	File receivedFile = new File(fileName);
+	Writer writer = new FileWriter(receivedFile);
+	writer.write(fileContents);
+	writer.close();
+	System.out.print("Received a file: " + fileName);
+}
+
+else {
+	System.out.println(msg);
+}
+
