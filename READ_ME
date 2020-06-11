@@ -49,6 +49,8 @@ Następnie:
       
      W przeciwnym wypadku, aplikacja zaczyna niektotrolowanie rzucać wyjątkami co prowadzi do gwałtownego wzrostu użycia procesora.
      
+     Ze względu na użycie kilku rodzaju flag w programie plik zawierający znaki specjalne może nie być poprawnie wysłany. 
+     
      Projekt nie jest realizacją prawdziwej komunikacji z szyfrowaniem OTP ponieważ wraz z wiadomością przesyłany jest klucz.
      Jest to oczywiste złamanie zasady bezpieczeństwa w komunikacji. Jednak dla celów demonstracyjnych uznaliśmy, że warto pokazać
      że algorytm działa nie tylko dla jednego klucza, dlatego zdecydowaliśmy się na to rozwiązanie. 
