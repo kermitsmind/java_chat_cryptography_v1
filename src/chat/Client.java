@@ -135,15 +135,19 @@ public class Client
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
+                                    String key = otp.getKey(contents);
+                                    contents = otp.getEncryptedText(contents,key);
+                                    msg =inputFileName + "--f--" + contents+(char)167+key;
 
-                                    msg =inputFileName + "--f--" + contents;
                                     System.out.println(msg);
                                     break;
                                 }
                                 case 2: {
                                     System.out.print("Your text message: ");
                                     msg = scn.nextLine();
-                                    msg = otp.doStaff("encrypt",msg);
+                                    String key = otp.getKey(msg);
+                                    msg = otp.getEncryptedText(msg,key);
+                                    msg=msg+(char)167+key;
                                     break;
                                 }
                             }
@@ -200,21 +204,27 @@ public class Client
 
                             File receivedFile = new File("recived.txt");
                             Writer writer = new FileWriter(receivedFile);
+                            int index = fileContents.indexOf((char)167);
+                            String key = fileContents.substring(index+1);
+                            fileContents.trim();
+                            fileContents=otp.getDecryptedText(fileContents.substring(0,index),key);
                             writer.write(fileContents);
                             writer.close();
                             System.out.print("Received a file: " + fileName);
                         }
 
                         else {
-                            System.out.println("!!");
-                            System.out.println(msg);
+
                             int i = msg.indexOf(':');
                             System.out.println(i);
-                            msg = msg.substring(i+1,msg.length()-1);
-
-                            System.out.println("!!");
-                            System.out.println("Recived encrypted message:"+ msg);
-                            System.out.println("Recived decrypted message:"+otp.doStaff("decrypt",msg));
+                            String from = msg.substring(0,i);
+                            msg = msg.substring(i+1);
+                            System.out.println(from+"send you encrypted message:"+ msg );
+                            int index = msg.indexOf((char)167);
+                            String key = msg.substring(index+1);
+                            msg.trim();
+                            System.out.println(key);
+                            System.out.println("Recived decrypted message:"+otp.getDecryptedText(msg.substring(0,index),key));
                             System.out.println();
                         }
                     }catch (EOFException e){

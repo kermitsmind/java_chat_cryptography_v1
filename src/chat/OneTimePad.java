@@ -1,135 +1,93 @@
-package chat;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+package chat;//Ogolnie wzialem to znowu z internetów, ale widzę, że samo szyfrowanie i deszyfrowanie jest dość zabawnie zrobione, bo nie używa kodu ASCII tylko bazuje na numerze w alfabecie. Tak czy inaczej jest to bardzo prosty program.
 
+import java.util.*;
 
-public class OneTimePad {
-
-//    public String textToEncrypt = "";
-//    public String textToDecrypt = "";
-//    public String encryptedText= "";
-//    public String decryptedText= "";
-
-    public static String doStaff(String choice, String textToChange) {
-
-        String controlName = "plik";
-        generatePad(controlName, 5, 60, 32, 126);
-        String text= textToChange ;
-//        String encrypted = parse(true, controlName, text.replaceAll(" ", ""));
-//        String decrypted = parse(false, controlName, encrypted);
-
-        generatePad(controlName, 5, 60, 32, 126);
-       String  encrypted = parse(true, controlName, text); //tutaj jest zaszyfrowana
-       String  decrypted = parse(false, controlName, text); //a tutaj odszyfrowana
-
-//        System.out.println(); //a tutaj wypisywańsko
-//        System.out.println("Input text     = " + text);
-//        System.out.println("Encrypted text = " + encrypted);
-//        System.out.println("Decrypted text = " + decrypted);
-        if(choice == "encrypt"){
-            return encrypted;
-        }
-            return decrypted ;
+public class OneTimePad{
+    public static String getKey(String text) {
+        return RandomKey(text.length()); //generowanie klucza
+    }
+    public static String getEncryptedText(String text, String key) {
+        return  OTPEncryption(text,key);
+    }
+    public static String getDecryptedText(String text, String key) {
+        return  OTPDecryption(text,key);
     }
 
-    private static String parse(boolean encryptText, String controlName, String text) {
-        StringBuilder sb = new StringBuilder();
-        int minCh = 0;
-        int maxCh = 0;
-        Pattern minChPattern = Pattern.compile("^#  MIN_CH = ([\\d]+)$");
-        Pattern maxChPattern = Pattern.compile("^#  MAX_CH = ([\\d]+)$");
-        boolean validated = false;
-        try (BufferedReader in = new BufferedReader(new FileReader(getFileName(controlName))); ) {
-            String inLine = null;
-            while ( (inLine = in.readLine()) != null ) {
-                Matcher minMatcher = minChPattern.matcher(inLine);
-                if ( minMatcher.matches() ) {
-                    minCh = Integer.parseInt(minMatcher.group(1));
-                    continue;
-                }
-                Matcher maxMatcher = maxChPattern.matcher(inLine);
-                if ( maxMatcher.matches() ) {
-                    maxCh = Integer.parseInt(maxMatcher.group(1));
-                    continue;
-                }
-                if ( ! validated && minCh > 0 && maxCh > 0 ) {
-                    validateText(text, minCh, maxCh);
-                    validated = true;
-                }
-                //  # komentarz  - uzyty klucz.
-                if ( inLine.startsWith("#") || inLine.startsWith("-") ) {
-                    continue;
-                }
-                //  klucz do deskrypcji
-                String key = inLine;
-                if ( encryptText ) {
-                    for ( int i = 0 ; i < text.length(); i++) {
-                        sb.append((char) (((text.charAt(i) - minCh + key.charAt(i) - minCh) % (maxCh - minCh + 1)) + minCh));
-                    }
-                }
-                else {
-                    for ( int i = 0 ; i < text.length(); i++) {
-                        int decrypt = text.charAt(i) - key.charAt(i);
-                        if ( decrypt < 0 ) {
-                            decrypt += maxCh - minCh + 1;
-                        }
-                        decrypt += minCh;
-                        sb.append((char) decrypt);
-                    }
-                }
-                break;
+    public static String RandomKey(int len){ //trywialne generowanie prostego klucza
+        Random r = new Random();
+        String key = "";
+        for(int x=0;x<len;x++)
+            key = key + (char) (r.nextInt(26) + 'A');
+        return key;
+    }
+
+    public static String OTPEncryption(String text,String key){ //szyfrowanie OTP
+        String alphaU = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String alphaL = "abcdefghijklmnopqrstuvwxyz";
+
+        int len = text.length(); //dlugosc tekstu
+
+        String sb = ""; //definiowanie zmiennej, w ktorej zapisujemy zaszyfrowane
+        for(int x=0;x<len;x++){ //petla po calym tekscie
+            char get = text.charAt(x); //bierzemy po jednej literce z tekstu
+            char keyget = key.charAt(x); //bierzemy po jednej literce z klucza
+            if(Character.isUpperCase(get)){ //sprawdza to nam czy duza literka w tekscie
+                int index = alphaU.indexOf(get); //bierze numer duzej litery z alfabetu
+                int keydex = alphaU.indexOf(Character.toUpperCase(keyget));//bierze numer z alfabetu z litery klucza
+
+                int total = (index + keydex) % 26; //dodaje je i dzieli modulo 26
+
+                sb = sb+ alphaU.charAt(total); //a tutaj dodaje nam do tego zakodowanego
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return sb.toString();
-    }
+            else if(Character.isLowerCase(get)){// sprawdza czy mala, reszta analogicznie
+                int index = alphaL.indexOf(get);
+                int keydex = alphaL.indexOf(Character.toLowerCase(keyget));
 
-    private static void validateText(String text, int minCh, int maxCh) {
-        //  Sprawdzanie legitnosci tekstu
-        for ( char ch : text.toCharArray() ) {
-            if ( ch != ' ' && (ch < minCh || ch > maxCh) ) {
-                throw new IllegalArgumentException("Niestety podales cos zlego");
+                int total = (index + keydex) % 26;
+
+                sb = sb+ alphaL.charAt(total);
+            }
+            else{ //jak nie to dopisujemy
+                sb = sb + get;
             }
         }
 
+        return sb;//zwracamy nasze zaszyfrowane
     }
+    public static String OTPDecryption(String text,String key){
+        String alphaU = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String alphaL = "abcdefghijklmnopqrstuvwxyz";
+        //tutaj analogicznie do szyfrowania, bo samo szyfrowanie jest trywialne
+        int len = text.length();
 
-    private static String getFileName(String controlName) {
-        return controlName + ".txt";
-    }
+        String sb = "";
+        for(int x=0;x<len;x++){
+            char get = text.charAt(x);
+            char keyget = key.charAt(x);
+            if(Character.isUpperCase(get)){
+                int index = alphaU.indexOf(get);
+                int keydex = alphaU.indexOf(Character.toUpperCase(keyget));
 
-    private static void generatePad(String controlName, int keys, int keyLength, int minCh, int maxCh)
-    //generowanie kluczaa
-    {
-        Random random = new Random();
-        try ( BufferedWriter writer = new BufferedWriter(new FileWriter(getFileName(controlName), false)); ) {
-            writer.write("#  Lines starting with '#' are ignored.");
-            writer.newLine();
-            writer.write("#  Lines starting with '-' are previously used.");
-            writer.newLine();
-            writer.write("#  MIN_CH = " + minCh);
-            writer.newLine();
-            writer.write("#  MAX_CH = " + maxCh);
-            writer.newLine();
-            for ( int line = 0 ; line < keys ; line++ ) {
-                StringBuilder sb = new StringBuilder();
-                for ( int ch = 0 ; ch < keyLength ; ch++ ) {
-                    sb.append((char) (random.nextInt(maxCh - minCh + 1) + minCh));
-                }
-                writer.write(sb.toString());
-                writer.newLine();
+                int total = (index - keydex) % 26;
+                total = (total<0)? total + 26 : total;
+
+                sb = sb+ alphaU.charAt(total);
             }
-            writer.write("#  EOF");
-            writer.newLine();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            else if(Character.isLowerCase(get)){
+                int index = alphaL.indexOf(get);
+                int keydex = alphaL.indexOf(Character.toLowerCase(keyget));
+
+                int total = (index - keydex) % 26;
+                total = (total<0)? total + 26 : total;
+
+                sb = sb+ alphaL.charAt(total);
+            }
+            else{
+                sb = sb + get;
+            }
         }
+
+        return sb;
     }
+
 }
