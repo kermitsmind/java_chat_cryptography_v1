@@ -1,0 +1,71 @@
+Instrukacja obsługi chatu: (wsyztskie wpisy do konsoli potwierdzamy enterem, w innym przypadku zostanie to zaznaczone w instrukcji)
+Należy wpierw uruchomić klasę Serwer:
+  - podajemy numer portu czatu w konosli (np 200)
+Następnie uruchamiamy klasę Client:
+  - kopiujemy pierwszą instrukcję która pojawia się w terminalu (jest bardzo długa, ale wystarczy dwa razy kliknąc w na nią żeby 
+      się zanzaczyła w całości)
+  - wpisujemy numer portu podany w porzednim kroku
+  - wpisujemy uniklaną nazwę użytkowanika 
+ Następnie żeby uruchomić drugą instację Clienta, należy otworzyć terminal w osobnym oknie 
+ (wcześniej pracowaliśmy w środowisku uruchomieniowym), poprzez kliknięcie w okno terminal
+Do nowego terminala przekopiowujemy instrukcję trzymaną w schowku. Nie potwierdzamy ENTERem! Instrukcja sama się wykona.
+Następnie:
+  - wpisujemy nr portu serwera 
+  - wpisujemy unikalną nazwę użytkownika
+  
+  W tym momencie postawiliśmy serwer i dwóch użytkowników. Mamy otwarty jeden terminal oraz dwa śrdowiska w zakładce "Run".
+  
+  Żeby skomunikować ze sobą użytkowników, należy dla każdego z nich wybrać opcję "Recipient" z MENU i wpisać nazwę użytkownika 
+  odbiorcy.
+ 
+  Po tej akcji, chat przestawia się automatycznie do trybu wysyłania wiadomości TEKSTOWEJ, jest to DOMYŚLNY tryb! Żeby pworócić do
+  MENU należy w konsolę wpisać "MENU".  
+  
+  Jeżeli w MENU wybierzemy opcję 1, to przejdziemy do wyboru nadawania wiadomości tekstowej lub pliku tekstowego(!).
+  Żeby wysłać plik należy:
+    
+   -wybrać opcję 1
+   -podać nazwę pliku (działa tylko do plików dodanych do lokalizji projektu, nie podajemy ścieżki a samą nazwę))
+  
+  Zawartość pliku jest szyfrowana według wcześniej wygenerowanego klucza. Następnie do zawartości pliku dodawana jest jego nazwa
+  wraz z flagą (--f--) oraz klucz użyty do zaszyfrowania tekstu poprzedzony znakiem §. W ten sposób przygotowana wiadomość jest wysyłana do
+  odbiorcy. 
+  
+  Po tej akcji, system AUTOMATYCZNIE przełącza się na domyślny tryb (zwykłej wiadomości tekstwej). W celu wysłania następnego
+  pliku należy wywołać MENU. 
+  
+  Zwykłe pliki tekstowe wysyłamy po wywołaniu trybu domyślnego aplikacji lub po wybraniu opcji 2 po wybraniu opcji 2 w głównym MENU
+  
+  ODBIORCA:
+    
+    Odbiorca rozpoznaje zwykłą wiadomość od tekstu po fladze --f--, w przypadku zwykłej wiadomości następuje zwykły proces
+    ekstrahowania klucza po fladze § i zdeszyforwania wiadomości. W przypadku pliku wpierw oddzielana jest jego nazwa do 
+    której dołączany jest tag "recived". Następnie dochodzi do pozyskania klucza, oraz deszyfracji zawartości pliku. 
+    Zdeszyfrowany plik jest zapisywany w lokalizacji projektu pod starą nazwą z dodanym tagiem. 
+    
+   UWAGI OGÓLNE:
+     Należy unikać ubijania procesów Clientów przed ich poprawnym rozłączeniem (opcja 3 w MENU). 
+     Należy unikać wyłączania Servera przed rozłączeniem klientów. 
+      
+     W przeciwnym wypadku, aplikacja zaczyna niektotrolowanie rzucać wyjątkami co prowadzi do gwałtownego wzrostu użycia procesora.
+     
+     Projekt nie jest realizacją prawdziwej komunikacji z szyfrowaniem OTP ponieważ wraz z wiadomością przesyłany jest klucz.
+     Jest to oczywiste złamanie zasady bezpieczeństwa w komunikacji. Jednak dla celów demonstracyjnych uznaliśmy, że warto pokazać
+     że algorytm działa nie tylko dla jednego klucza, dlatego zdecydowaliśmy się na to rozwiązanie. 
+     
+     
+   Autorzy:
+        -Michał Błaszczak (Komunikacja Serwer - Client)
+        -Marlena Dziurawiec (Opracowanie modelu wysyłania plików)
+        -Miłosz Rybak (dostarczenie algorytmu szyfrującego)
+        -Mikołaj Deszcz (Konsolidacja rozwiązań, opracowanie instrukcji)
+  
+  
+  Szczegółowy podział pracy widoczny jest w plikach repozytorium. Kod dostarczony przez Marlenę Dziurawiec oraz Miłosza Rybaka
+  znajduje się w plikach opatrzonych stosownymi imionami. Kod dostarczony przez Mikołaja Deszcza i Michała Błaszczaka można
+  widzoczny będzie poprzez analizę poszczególnych commitów.
+
+  
+  Załoga 4xM życzy miłego dnia!
+  
+  
